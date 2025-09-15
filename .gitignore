@@ -1,41 +1,71 @@
-# Prerequisites
-*.d
+#include <iostream>
+bool running = true;
+cout << fixed << setprecision(2);
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
 
-# Precompiled Headers
-*.gch
-*.pch
+while (running) {
+showMenu();
 
-# Linker files
-*.ilk
 
-# Debugger Files
-*.pdb
+int choice;
+if (!(cin >> choice)) {
+// Handle non-numeric menu input
+cin.clear();
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+cout << "Invalid option! Please choose a valid menu option." << '\n';
+continue;
+}
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
 
-# Fortran module files
-*.mod
-*.smod
+switch (choice) {
+case 1: { // Deposit
+double amount;
+bool ok = readAmount("Enter amount to deposit: ", amount);
+if (!ok || amount <= 0.0) {
+cout << "Invalid amount. Deposit must be positive." << '\n';
+} else {
+// Assertion ensures arithmetic does not corrupt state
+double old = balance;
+balance += amount;
+assert(balance >= 0.0 && "Balance should never be negative after deposit");
+// Simple correctness check: new balance should equal old + amount (within tolerance)
+assert((balance - (old + amount)) < 1e-9 && "Deposit calculation error");
+cout << "\nDeposit successful! New balance: $" << balance << '\n';
+}
+break;
+}
+case 2: { // Withdraw
+double amount;
+bool ok = readAmount("Enter amount to withdraw: ", amount);
+if (!ok || amount <= 0.0) {
+cout << "Invalid amount. Withdrawal must be positive." << '\n';
+} else if (amount > balance) {
+cout << "\nInsufficient funds! Withdrawal failed." << '\n';
+} else {
+double old = balance;
+balance -= amount;
+// Assertions to guard against negative balances / miscalculation
+assert(balance >= 0.0 && "Balance should not go negative");
+assert(((old - amount) - balance) < 1e-9 && "Withdrawal calculation error");
+cout << "\nWithdrawal successful! New balance: $" << balance << '\n';
+}
+break;
+}
+case 3: { // Check Balance
+cout << "\nYour current balance is: $" << balance << '\n';
+break;
+}
+case 4: { // Exit
+cout << "\nExiting the banking system. Thank you for using our service!" << '\n';
+running = false;
+break;
+}
+default:
+cout << "\nInvalid option! Please choose a valid menu option." << '\n';
+break;
+}
+}
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
 
-# Executables
-*.exe
-*.out
-*.app
-
-# debug information files
-*.dwo
+return 0;
+}
